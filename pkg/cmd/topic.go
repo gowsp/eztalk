@@ -7,28 +7,33 @@ import (
 
 	"github.com/eztalk/pkg/invoker"
 )
-
-var cmds = map[string]TopicType{
-	"/歇后语":   Fable,
-	"/猜字谜":   Riddles,
-	"/脑筋急转弯": BrainTwists,
+// 聊天命令
+func newTopicCmd(i *invoker.Invoker) Cmd {
+	return &topicCmd{
+		invoker: i,
+		cmds: map[string]topicType{
+			"/歇后语":   Fable,
+			"/猜字谜":   Riddles,
+			"/脑筋急转弯": BrainTwists,
+		}}
 }
 
 // 题目类型
-type TopicType string
+type topicType string
 
 const (
 	//歇后语
-	Fable TopicType = "fable"
+	Fable topicType = "fable"
 	// 字谜
-	Riddles TopicType = "riddles"
+	Riddles topicType = "riddles"
 	//脑经急转弯
-	BrainTwists TopicType = "brainTwists"
+	BrainTwists topicType = "brainTwists"
 )
 
 // 趣味问答
 type topicCmd struct {
 	session sync.Map
+	cmds    map[string]topicType
 	invoker *invoker.Invoker
 }
 
@@ -44,14 +49,14 @@ func (c *topicCmd) Interactive() bool {
 
 // 题目
 type topic struct {
-	Type   TopicType
+	Type   topicType
 	answer *answer
 	UUID   string `json:"uuid"`
 	Riddle string `json:"riddle"`
 }
 
 func (c *topicCmd) Handle(input Input) (string, error) {
-	topicType := cmds[input.UserInput()]
+	topicType := c.cmds[input.UserInput()]
 	params := make(url.Values)
 	params.Add("type", string(topicType))
 	params.Add("output", "riddle")

@@ -2,6 +2,7 @@ package cmd
 
 import "github.com/eztalk/pkg/invoker"
 
+// 用户输入信息
 type Input interface {
 	UserId() string
 	UserInput() string
@@ -19,10 +20,13 @@ type Cmd interface {
 	Reply(Input) string
 }
 
-// 初始化交互命令
-func Init(i *invoker.Invoker) []Cmd {
-	return []Cmd{
-		&jokeCmd{i},
-		&topicCmd{invoker: i},
+// 命令构建器
+type CmdBuilder func(i *invoker.Invoker) Cmd
+
+// 默认命令
+func Default(i *invoker.Invoker) []CmdBuilder {
+	return []CmdBuilder{
+		newJokeCmd,
+		newTopicCmd,
 	}
 }

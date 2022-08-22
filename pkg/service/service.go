@@ -14,6 +14,8 @@ import (
 type Service interface {
 	// 机器人toekn
 	BotToken() string
+	// 增加指令
+	AddCmd(builder cmd.CmdBuilder)
 	// 获取ws地址
 	WsUrl() (string, error)
 	// 监听消息
@@ -26,9 +28,8 @@ func New(i *invoker.Invoker) Service {
 		invoker: i,
 		command: make(map[string]cmd.Cmd),
 	}
-	cmds := cmd.Init(i)
-	for _, cmd := range cmds {
-		service.addCmd(cmd)
+	for _, cmd := range cmd.Default(i) {
+		service.AddCmd(cmd)
 	}
 	return service
 }
@@ -40,7 +41,8 @@ type service struct {
 	invoker *invoker.Invoker
 }
 
-func (s *service) addCmd(cmd cmd.Cmd) {
+func (s *service) AddCmd(builder cmd.CmdBuilder) {
+	cmd := builder(s.invoker)
 	for _, id := range cmd.Id() {
 		s.command[id] = cmd
 		s.desc.WriteString(id + "\n")

@@ -8,6 +8,11 @@ import (
 )
 
 // 讲笑话命令
+func newJokeCmd(i *invoker.Invoker) Cmd {
+	return &jokeCmd{i}
+}
+
+// 讲笑话命令
 type jokeCmd struct {
 	invoker *invoker.Invoker
 }
