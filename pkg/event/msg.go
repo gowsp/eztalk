@@ -1,4 +1,4 @@
-package wss
+package event
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"nhooyr.io/websocket/wsjson"
 )
 
+// 事件数据
 type event struct {
 	Type   string          `json:"t,omitempty"`
 	OpCode int             `json:"op,omitempty"`
@@ -16,24 +17,22 @@ type event struct {
 	Data   json.RawMessage `json:"d,omitempty"`
 }
 
+// 事件key
 func (e *event) key() string {
 	return fmt.Sprintf("%d:%s", e.OpCode, e.Type)
 }
 
-type output struct {
+// 回复 websocket 消息体
+type reply struct {
 	OpCode opcode      `json:"op,omitempty"`
 	Data   interface{} `json:"d,omitempty"`
 }
 
+// 写消息
 func write(conn *websocket.Conn, code opcode, data interface{}) error {
-	msg := output{
+	msg := reply{
 		OpCode: code,
 		Data:   data,
 	}
-	d, err := json.Marshal(msg)
-	if err != nil {
-		return err
-	}
-	fmt.Println(string(d))
 	return wsjson.Write(context.Background(), conn, msg)
 }

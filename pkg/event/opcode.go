@@ -1,7 +1,8 @@
-package wss
+package event
 
 import "fmt"
 
+// 事件码
 type opcode int
 
 const (
@@ -12,6 +13,7 @@ const (
 	Heartbeat_ACK opcode = 11
 )
 
+// 组合为事件key
 func (o opcode) Event(val string) string {
 	return fmt.Sprintf("%d:%s", o, val)
 }

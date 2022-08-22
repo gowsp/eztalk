@@ -1,28 +1,28 @@
-package wss
+package event
 
 import (
 	"context"
 	"log"
 
-	"github.com/eztalk/pkg/eztalk"
+	"github.com/eztalk/pkg/service"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 )
 
-func New(service eztalk.Service) *Wss {
-	return &Wss{
-		mux: NewMux(service),
+func New(service service.Service) *Listener {
+	return &Listener{
+		mux: newMux(service),
 		ctx: context.Background(),
 	}
 }
 
-type Wss struct {
+type Listener struct {
 	url string
 	mux *mux
 	ctx context.Context
 }
 
-func (w *Wss) Connect(url string) error {
+func (w *Listener) Listen(url string) error {
 	log.Println("start connect to", url)
 	conn, _, err := websocket.Dial(context.Background(), url, nil)
 	if err != nil {

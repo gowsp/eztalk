@@ -1,0 +1,10 @@
+{
+    "app_key": {
+        "/xiaohua": "xxxxxxxxx",
+        "/amusingQA": "xxxxxxxxx"
+    },
+    "bot_env": "xxxxxx",
+    "bot_app_id": "xxxxxx",
+    "bot_secret": "xxxxxxx",
+    "bot_token": "xxxxxxxxxx"
+}

@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/eztalk/pkg/eztalk"
+	"github.com/eztalk/pkg/event"
 	"github.com/eztalk/pkg/invoker"
-	"github.com/eztalk/pkg/wss"
+	"github.com/eztalk/pkg/service"
 )
 
 func New(config *invoker.Config) *Bot {
@@ -15,13 +15,15 @@ func New(config *invoker.Config) *Bot {
 	return &Bot{invoker: i}
 }
 
+// 机器人结构体
 type Bot struct {
 	invoker *invoker.Invoker
 }
 
+// 启动机器人
 func (b *Bot) Start() error {
-	service := eztalk.New(b.invoker)
-	w := wss.New(service)
+	service := service.New(b.invoker)
+	w := event.New(service)
 	for i := 0; i < 3; i++ {
 		url, err := service.WsUrl()
 		if err != nil {
@@ -30,7 +32,7 @@ func (b *Bot) Start() error {
 			continue
 		}
 		i = 0
-		if err := w.Connect(url); err != nil {
+		if err := w.Listen(url); err != nil {
 			log.Println(err)
 			time.Sleep(3 * time.Second)
 			continue

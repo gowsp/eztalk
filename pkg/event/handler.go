@@ -1,38 +1,22 @@
-package wss
+package event
 
 import (
 	"encoding/json"
 	"log"
-	"time"
 
-	"github.com/eztalk/pkg/eztalk"
+	"github.com/eztalk/pkg/service"
 	"nhooyr.io/websocket"
 )
 
-type heartbeat struct {
-	Interval uint64 `json:"heartbeat_interval,omitempty"`
-}
+type handler func(*websocket.Conn, *event)
 
-func (h *heartbeat) start(c *websocket.Conn, seq func() uint64) {
-	t := time.NewTicker(time.Millisecond * time.Duration(h.Interval))
-	for {
-		select {
-		case <-t.C:
-			err := write(c, Heartbeat, seq())
-			if err != nil {
-				log.Println(err)
-				t.Stop()
-				return
-			}
-		}
-	}
-}
-
+// 鉴权结构体
 type auth struct {
 	Token   string `json:"token,omitempty"`
 	Intents int    `json:"intents,omitempty"`
 }
 
+// 鉴权事件
 func (m *mux) auth(conn *websocket.Conn, e *event) {
 	h := new(heartbeat)
 	if err := json.Unmarshal(e.Data, h); err != nil {
@@ -46,6 +30,7 @@ func (m *mux) auth(conn *websocket.Conn, e *event) {
 	})
 }
 
+// 开启心跳事件
 func (m *mux) ping(c *websocket.Conn, e *event) {
 	go func() {
 		m.heartbeat.start(c, func() uint64 {
@@ -54,10 +39,12 @@ func (m *mux) ping(c *websocket.Conn, e *event) {
 	}()
 }
 
+// 消息创建事件
 func (m *mux) message(c *websocket.Conn, e *event) {
-	msg := new(eztalk.Message)
+	msg := new(service.Message)
 	if err := json.Unmarshal(e.Data, msg); err != nil {
 		log.Println(err)
+		return
 	}
 	m.service.Serve(msg)
 }

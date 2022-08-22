@@ -1,23 +1,30 @@
-package eztalk
+package service
 
 import (
 	"strings"
 	"time"
 )
 
-// websocket 连接
+// 用户结构体
+type User struct {
+	ID   string `json:"id"`
+	Name string `json:"username"`
+	Bot  bool   `json:"bot"`
+}
+
+// @前缀
+func (u *User) Mention() string {
+	return "<@!" + u.ID + ">"
+}
+
+// websocket 连接地址信息
 type wsUrl struct {
 	Url string `json:"url,omitempty"`
 }
 
-// 消息
+// 消息结构体
 type Message struct {
-	Author struct {
-		Avatar   string `json:"avatar"`
-		Bot      bool   `json:"bot"`
-		ID       string `json:"id"`
-		Username string `json:"username"`
-	} `json:"author"`
+	Author    User   `json:"author"`
 	ChannelID string `json:"channel_id"`
 	Content   string `json:"content"`
 	GuildID   string `json:"guild_id"`
@@ -27,12 +34,7 @@ type Message struct {
 		Nick     string    `json:"nick"`
 		Roles    []string  `json:"roles"`
 	} `json:"member"`
-	Mentions []struct {
-		Avatar   string `json:"avatar"`
-		Bot      bool   `json:"bot"`
-		ID       string `json:"id"`
-		Username string `json:"username"`
-	} `json:"mentions"`
+	Mentions         []User `json:"mentions"`
 	MessageReference struct {
 		MessageID string `json:"message_id"`
 	} `json:"message_reference"`
@@ -41,23 +43,21 @@ type Message struct {
 	Timestamp    time.Time `json:"timestamp"`
 }
 
-// 回复消息ID
-func (m *Message) ReplyId() string {
-	return m.MessageReference.MessageID
+// 消息创建者ID
+func (m *Message) UserId() string {
+	return m.Author.ID
 }
 
-// 是否请求
-func (m *Message) IsRequest() bool {
-	return m.ReplyId() == ""
-}
-
-//用户输入消息
+// 获取用户输入消息
 func (m *Message) UserInput() string {
-	val := strings.TrimLeft(m.Content, "\u003c@!xxxxxxxxxxxxxx\u003e ")
-	return strings.TrimSpace(val)
+	content := m.Content
+	for _, user := range m.Mentions {
+		content = strings.ReplaceAll(content, user.Mention(), "")
+	}
+	return strings.TrimSpace(content)
 }
 
-// 消息请求
+// 回复消息
 type Reply struct {
 	Content string `json:"content"`
 	MsgID   string `json:"msg_id"`
