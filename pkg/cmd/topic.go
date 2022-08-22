@@ -7,6 +7,7 @@ import (
 
 	"github.com/eztalk/pkg/invoker"
 )
+
 // 聊天命令
 func newTopicCmd(i *invoker.Invoker) Cmd {
 	return &topicCmd{
@@ -66,30 +67,34 @@ func (c *topicCmd) Handle(input Input) (string, error) {
 	}
 	question.Type = topicType
 	c.session.Store(input.UserId(), question)
-	return question.Riddle, nil
+	return "客官请接题：" + question.Riddle, nil
 }
 
-func (s *topicCmd) Reply(input Input) string {
+func (s *topicCmd) Reply(input Input) (string, bool) {
 	userId := input.UserId()
 	data, ok := s.session.Load(userId)
 	if !ok {
-		return "服务开小差了"
+		return "服务开小差了", true
 	}
 	answer, err := s.getAnswer(data.(*topic))
 	if err != nil {
 		log.Println(err)
-		return "服务开小差了"
+		return "服务开小差了", false
 	}
 	request := input.UserInput()
 	if request == "答案" {
 		s.session.Delete(userId)
-		return "答案：" + answer.Answer
+		return "答案：" + answer.Answer, true
+	}
+	if request == "不玩了" {
+		s.session.Delete(userId)
+		return "好滴～～～", true
 	}
 	if answer.isCorrect(request) {
 		s.session.Delete(userId)
-		return "厉害啊，恭喜客官答对了"
+		return "恭喜客官答对了", true
 	}
-	return "客官回答错误了，再试试"
+	return "客官答错了，再试试", false
 }
 
 // 回答

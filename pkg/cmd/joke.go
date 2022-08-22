@@ -48,6 +48,6 @@ func (c *jokeCmd) Handle(input Input) (string, error) {
 }
 
 // 回复消息
-func (c *jokeCmd) Reply(input Input) string {
-	return ""
+func (c *jokeCmd) Reply(input Input) (string, bool) {
+	return "", true
 }

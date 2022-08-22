@@ -61,7 +61,10 @@ func (s *service) WsUrl() (string, error) {
 func (o *service) Serve(msg *Message) {
 	var content string
 	if val, ok := o.session.Load(msg.UserId()); ok {
-		content = val.(cmd.Cmd).Reply(msg)
+		var remove bool
+		if content, remove = val.(cmd.Cmd).Reply(msg); remove {
+			o.session.Delete(msg.UserId())
+		}
 	} else {
 		content = o.Greet(msg)
 	}

@@ -31,4 +31,4 @@ type customCmd struct {
 func (c *customCmd) Id() []string                     { return []string{"hello"} }
 func (c *customCmd) Interactive() bool                { return false }
 func (c *customCmd) Handle(cmd.Input) (string, error) { return "自定义", nil }
-func (c *customCmd) Reply(cmd.Input) string           { return "" }
+func (c *customCmd) Reply(cmd.Input) (string, bool)   { return "", true }

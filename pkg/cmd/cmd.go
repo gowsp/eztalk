@@ -16,8 +16,8 @@ type Cmd interface {
 	Interactive() bool
 	// 处理消息
 	Handle(Input) (string, error)
-	// 回复消息
-	Reply(Input) string
+	// 回复消息, true 解除会话关联
+	Reply(Input) (string, bool)
 }
 
 // 命令构建器
